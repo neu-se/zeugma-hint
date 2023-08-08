@@ -122,8 +122,5 @@ final class GenerateClassVisitor extends ClassVisitor {
             super.visitLabel(varEnd);
             super.visitMaxs(maxStack, maxLocals);
         }
-
-        public void hasFrames(boolean hasFrames) {
-        }
     }
 }

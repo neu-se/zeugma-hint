@@ -11,11 +11,11 @@ import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Type;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.AnnotationNode;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.ClassNode;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.MethodNode;
-import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.Monitors;
+import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.Monitor;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleMap;
 
 public final class MonitorUtil {
-    private static final String MONITORS_DESC = Type.getDescriptor(Monitors.class);
+    private static final String MONITOR_DESC = Type.getDescriptor(Monitor.class);
 
     private MonitorUtil() {
         throw new AssertionError();
@@ -54,7 +54,7 @@ public final class MonitorUtil {
                                           SimpleMap<MethodInfo, MethodInfo> monitorMap) {
         if ((mn.access & Opcodes.ACC_STATIC) != 0 && mn.invisibleAnnotations != null) {
             for (AnnotationNode an : mn.invisibleAnnotations) {
-                if (MONITORS_DESC.equals(an.desc)) {
+                if (MONITOR_DESC.equals(an.desc)) {
                     MonitorRecordBuilder builder = new MonitorRecordBuilder(ZeugmaAgent.ASM_VERSION);
                     an.accept(builder);
                     MethodInfo record = builder.build();
