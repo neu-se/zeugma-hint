@@ -21,6 +21,7 @@ public final class GenerateEventBroker {
         GenerateEventBroker.subscriber = subscriber;
     }
 
+    @SuppressWarnings("unused")
     public static int starting() {
         GenerateEventSubscriber s = subscriber;
         if (s != null && ThreadFieldAccessor.reserve()) {
@@ -33,6 +34,7 @@ public final class GenerateEventBroker {
         return -1;
     }
 
+    @SuppressWarnings("unused")
     public static void finished(Object generated, int start) {
         GenerateEventSubscriber s = subscriber;
         if (s != null && start != -1 && ThreadFieldAccessor.reserve()) {
@@ -48,6 +50,7 @@ public final class GenerateEventBroker {
         return random.nextInt() == FLAG;
     }
 
+    @SuppressWarnings("unused")
     public static String produceString(Random random) {
         byte[] values = new byte[random.nextInt(MAX_STRING_LENGTH)];
         random.nextBytes(values);

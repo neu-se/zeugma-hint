@@ -1,0 +1,1 @@
+*#generate(Lcom/pholser/junit/quickcheck/random/SourceOfRandomness;Lcom/pholser/junit/quickcheck/generator/GenerationStatus;)Ljava/lang/String; false

@@ -30,6 +30,10 @@ public final class MethodInfo {
         return descriptor;
     }
 
+    public boolean isStatic() {
+        return isStatic;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

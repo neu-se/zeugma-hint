@@ -105,10 +105,10 @@
                             <execution>
                                 <configuration>
                                     <jvm>${jvm.dir}/bin/java</jvm>
-                                    <reuseForks>false</reuseForks>
                                     <argLine>
                                         -javaagent:${edu.neu.ccs.prl.zeugma:zeugma-hint-agent:jar}
                                         -Xbootclasspath/a:${edu.neu.ccs.prl.zeugma:zeugma-hint-core:jar}
+                                        -Dzeugma.hint.sources=${project.basedir}/src/test/resources/hint-sources.txt
                                     </argLine>
                                 </configuration>
                                 <goals>

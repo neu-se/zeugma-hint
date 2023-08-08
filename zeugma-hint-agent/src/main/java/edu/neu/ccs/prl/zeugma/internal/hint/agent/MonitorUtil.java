@@ -14,7 +14,7 @@ import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.MethodNode;
 import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.Monitor;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleMap;
 
-public final class MonitorUtil {
+final class MonitorUtil {
     private static final String MONITOR_DESC = Type.getDescriptor(Monitor.class);
 
     private MonitorUtil() {
