@@ -14,6 +14,7 @@ import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 import edu.neu.ccs.prl.zeugma.internal.util.Interval;
 
 public class HintDeriver implements TestObserver {
+    private static final int MINIMUM_MATCH_LENGTH = 2;
     private final TestRunner runner;
     private ComparisonRecorder recorder;
     private GenerateCollector collector;
@@ -38,13 +39,26 @@ public class HintDeriver implements TestObserver {
         GenerateEventBroker.setSubscriber(null);
     }
 
-    private synchronized void createHints(Object oldValue, String newValue) {
-        // Operand matches entire generated object
-        // TODO partial matches possibly with minimum length
-        SimpleList<Interval> sources = collector.getSources(oldValue);
+    private synchronized void createHints(String oldValue, String newValue) {
+        // The old value matches the entire generated object
+        createHints(collector.getSources(oldValue), newValue);
+        if (oldValue.length() >= MINIMUM_MATCH_LENGTH) {
+            // The generated string contains the old value
+            SimpleList<String> matches = collector.findPartialMatches(oldValue);
+            for (int i = 0; i < matches.size(); i++) {
+                String match = matches.get(i);
+                if (!oldValue.equals(match)) {
+                    String value = replaceFirst(match, oldValue, newValue);
+                    createHints(collector.getSources(match), value);
+                }
+            }
+        }
+    }
+
+    private synchronized void createHints(SimpleList<Interval> sources, String value) {
         if (sources != null) {
             for (int i = 0; i < sources.size(); i++) {
-                hints.add(new StringHint(sources.get(i), newValue));
+                hints.add(new StringHint(sources.get(i), value));
             }
         }
     }
@@ -68,5 +82,11 @@ public class HintDeriver implements TestObserver {
             collector = null;
             hints = new SimpleSet<>();
         }
+    }
+
+    private static String replaceFirst(String s, String old, String replacement) {
+        StringBuilder builder = new StringBuilder(s);
+        int index = builder.indexOf(old);
+        return builder.replace(index, index + old.length(), replacement).toString();
     }
 }
