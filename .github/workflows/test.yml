@@ -1,0 +1,33 @@
+name: Test
+on: [ push, pull_request ]
+env:
+  JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+jobs:
+  unit-test:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Unit Test
+        run: mvn -B -ntp -e -DskipITs install
+        shell: bash
+  integration-test:
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ '8', '11', '17' ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build Project
+        run: mvn -B -ntp -e -DskipTests install
+        shell: bash
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+      - name: Integration Test
+        run: mvn -B -ntp -e -pl :zeugma-hint-guidance verify
+        shell: bash
