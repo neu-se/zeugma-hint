@@ -152,7 +152,7 @@ def create_failures_table(campaigns):
 
 
 def create_detections_table(campaigns):
-    # 1. Read detected failure
+    # 1. Read detected failures
     # 2. Remove failures not manually mapped to defects
     # 3. Transform each associated defect into a row
     # 4. Simplify column names.
