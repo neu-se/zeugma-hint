@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            font-family: Open Sans, sans-serif;
+            color: black;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 550;
+            display: block;
+        }
+
+        h3 {
+            font-size: 12px;
+            display: block;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: calc((100vh - 100px) * 1 / 2);
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .wrapper {
+            display: flex;
+            overflow-x: scroll;
+            gap: 20px;
+        }
+
+        table * {
+            font-size: 10px;
+            font-weight: normal;
+            text-align: right;
+            padding: 5px;
+        }
+
+        table caption {
+            text-align: left !important;
+            font-weight: 550;
+        }
+
+        table {
+            border-bottom: black 1px solid;
+            border-top: black 1px solid;
+            border-collapse: separate;
+            border-spacing: 2px 2px;
+        }
+
+        ul.legend li {
+            display: inline;
+            padding: 5px 15px;
+            font-size: 15px;
+        }
+
+    </style>
+    <title>Fuzzing Report</title>
+</head>
+<body>
+{% macro pairwise(title, elements) -%}
+<div>
+    <h3>{{ title }}</h3>
+    <div class="wrapper">
+        {% for e in elements %}
+        {{ e }}
+        {% endfor %}
+    </div>
+</div>
+{%- endmacro %}
+<div>
+    <div>
+        <h2>Coverage</h2>
+        {{ coverage_table }}
+        {{ pairwise('Pairwise P-Values and Effect Sizes', coverage_pairwise) }}
+        <div>
+            <h3>Coverage Over Time</h3>
+            <ul class="legend">
+                {% for subject, color in coverage_legend | dictsort %}
+                <li>
+                    <svg width="15px" height="12px">
+                        <rect width="15px" height="12px" style="fill:{{ color }};stroke-width:2;stroke:rgb(0,0,0)"/>
+                    </svg>
+                    {{ subject }}
+                </li>
+                {% endfor %}
+            </ul>
+            {{ pairwise('', coverage_plots.values()) }}
+        </div>
+    </div>
+    <div>
+        <h2>Defects</h2>
+        {{ defect_table }}
+        {{ pairwise('Pairwise P-Values and Effect Sizes', defect_pairwise) }}
+    </div>
+</div>
+</body>
+</html>
