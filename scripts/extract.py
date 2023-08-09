@@ -52,6 +52,11 @@ class Campaign:
         fuzzer = summary['frameworkClassName'].split('.')[-1].replace('Framework', '')
         if fuzzer == 'ZeugmaHint':
             fuzzer = 'Zeugma-Hint'
+            level = 'X'
+            for opt in summary['configuration']['javaOptions']:
+                if opt.startswith('-Dzeugma.hint.level='):
+                    level = opt[len('-Dzeugma.hint.level='):].title()
+            fuzzer += "-" + level.replace('None', 'X')
         return fuzzer
 
     def add_trial_info(self, df):

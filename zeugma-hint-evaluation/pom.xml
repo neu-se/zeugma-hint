@@ -90,6 +90,23 @@
     </build>
     <profiles>
         <profile>
+            <id>hint-local</id>
+            <properties>
+                <meringue.argLine>
+                    -Dzeugma.hint.level=local
+                </meringue.argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>hint-global</id>
+            <properties>
+                <meringue.argLine>
+                    -Dzeugma.hint.level=global
+                    -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005
+                </meringue.argLine>
+            </properties>
+        </profile>
+        <profile>
             <id>ant</id>
             <properties>
                 <meringue.testClass>edu.neu.ccs.prl.zeugma.eval.FuzzAnt</meringue.testClass>

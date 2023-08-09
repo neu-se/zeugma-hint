@@ -10,7 +10,7 @@ import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleList;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 import edu.neu.ccs.prl.zeugma.internal.util.IntProducer;
 
-public class HintModifier<E extends HintIndividual> implements Modifier<E> {
+public class HintModifier implements Modifier<HintIndividual> {
     /**
      * Mutates individuals.
      * <p>
@@ -23,41 +23,45 @@ public class HintModifier<E extends HintIndividual> implements Modifier<E> {
      * Non-null.
      */
     private final IntProducer countSampler;
-    /**
-     * Pseudo-random number generator.
-     * <p>
-     * Non-null.
-     */
-    private final Random random;
     private final Selector<Object> selector;
+    private final OperationType[] enabled;
 
-    public HintModifier(Random random, Mutator mutator, IntProducer countSampler) {
-        if (random == null || mutator == null || countSampler == null) {
+    public HintModifier(Random random, Mutator mutator, IntProducer countSampler, OperationType[] enabled) {
+        if (mutator == null || countSampler == null) {
             throw new NullPointerException();
+        } else if (enabled.length == 0) {
+            throw new IllegalArgumentException();
         }
-        this.random = random;
         this.mutator = mutator;
         this.countSampler = countSampler;
         this.selector = new RandomSelector<>(random);
+        this.enabled = enabled.clone();
     }
 
     @Override
-    public ByteList modify(E parent, SimpleList<? extends E> population) {
+    public ByteList modify(HintIndividual parent, SimpleList<? extends HintIndividual> population) {
         int count = countSampler.get();
-        SimpleList<DerivedMutator> derived = new SimpleList<>(count);
-        int mutationCount = count;
-        if (!parent.getLocalHints().isEmpty()) {
-            for (int i = 0; i < count; i++) {
-                if (random.nextBoolean()) {
-                    derived.add(selector.select(parent.getLocalHints()));
-                    mutationCount--;
-                }
+        SimpleList<Mutator> mutators = new SimpleList<>(count);
+        SimpleList<OperationType> types = OperationType.getValid(parent, enabled);
+        for (int i = 0; i < count; i++) {
+            switch (selector.select(types)) {
+                case LOCAL_HINT:
+                    mutators.add(selector.select(parent.getLocalHints()));
+                    break;
+                case GLOBAL_HINT:
+                    mutators.add(createGlobalHint(parent));
+                    break;
+                case MUTATE:
+                    mutators.add(mutator);
+                    break;
             }
         }
-        ByteList child = DerivedMutator.apply(derived.toArray(new DerivedMutator[derived.size()]), parent.getInput());
-        for (int i = 0; i < mutationCount && mutator.isValid(child); i++) {
-            child = mutator.mutate(child);
-        }
-        return child;
+        return HintUtil.apply(mutators, parent.getInput());
+    }
+
+    private StringHint createGlobalHint(HintIndividual parent) {
+        HintSite site = selector.select(parent.getHintSites());
+        String target = selector.select(GlobalHintRegistry.getTargets());
+        return new StringHint(site.getSource(), target);
     }
 }

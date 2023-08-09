@@ -5,6 +5,7 @@ import edu.neu.ccs.prl.zeugma.internal.runtime.struct.Iterator;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.ObjectIntMap;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleList;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleMap;
+import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleSet;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 import edu.neu.ccs.prl.zeugma.internal.util.Interval;
 import edu.neu.ccs.prl.zeugma.internal.util.UnmodifiableByteList;
@@ -49,5 +50,18 @@ class GenerateCollector implements GenerateEventSubscriber {
             }
         }
         return matches;
+    }
+
+    public synchronized SimpleSet<HintSite> getHintSites() {
+        Iterator<ObjectIntMap.Entry<Object>> itr = generatedSourceMap.getBackingMap().entryIterator();
+        SimpleSet<HintSite> sites = new SimpleSet<>();
+        while (itr.hasNext()) {
+            Object key = itr.next().getKey();
+            SimpleList<Interval> sources = generatedSourceMap.get(key);
+            for (int i = 0; i < sources.size(); i++) {
+                sites.add(new HintSite(sources.get(i)));
+            }
+        }
+        return sites;
     }
 }

@@ -15,7 +15,7 @@ import edu.neu.ccs.prl.zeugma.internal.parametric.AttemptUnawareGenerationStatus
 import edu.neu.ccs.prl.zeugma.internal.provider.BasicRecordingDataProvider;
 import edu.neu.ccs.prl.zeugma.internal.provider.DataProviderFactory;
 import edu.neu.ccs.prl.zeugma.internal.provider.RecordingDataProvider;
-import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleSet;
+import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleList;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteArrayList;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 import edu.neu.ccs.prl.zeugma.parametric.ProviderBackedRandomness;
@@ -44,7 +44,9 @@ class HintDeriverITCase {
             }
         };
         ByteList values = ByteArrayList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);
-        SimpleSet<StringHint> hints = new HintDeriver(new MockFuzzTarget(runner)).derive(values);
+        HintDeriver deriver = new HintDeriver(new MockFuzzTarget(runner));
+        deriver.derive(values);
+        SimpleList<StringHint> hints = deriver.getHints();
         Assertions.assertEquals(targets.length, hints.size());
     }
 
@@ -57,15 +59,15 @@ class HintDeriverITCase {
         };
         ByteList values = ByteArrayList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);
         MockFuzzTarget fuzzTarget = new MockFuzzTarget(runner);
-        SimpleSet<StringHint> hints = new HintDeriver(fuzzTarget).derive(values);
+        HintDeriver deriver = new HintDeriver(fuzzTarget);
+        deriver.derive(values);
+        SimpleList<StringHint> hints = deriver.getHints();
         Assertions.assertEquals(1, hints.size());
-        StringHint hint = hints.getBackingMap().entryIterator().next().getKey();
+        StringHint hint = hints.get(0);
         ByteList recording = fuzzTarget.report.getRecording();
         AtomicBoolean match = new AtomicBoolean(false);
-        fuzzTarget = new MockFuzzTarget(s -> {
-            match.set(target.equals(s.get()));
-        });
-        fuzzTarget.run(FACTORY.create(hint.apply(recording)));
+        fuzzTarget = new MockFuzzTarget(s -> match.set(target.equals(s.get())));
+        fuzzTarget.run(FACTORY.create(hint.mutate(recording)));
         Assertions.assertTrue(match.get());
     }
 
@@ -80,7 +82,9 @@ class HintDeriverITCase {
             }
         };
         ByteList values = ByteArrayList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);
-        SimpleSet<StringHint> hints = new HintDeriver(new MockFuzzTarget(runner)).derive(values);
+        HintDeriver deriver = new HintDeriver(new MockFuzzTarget(runner));
+        deriver.derive(values);
+        SimpleList<StringHint> hints = deriver.getHints();
         Assertions.assertEquals(0, hints.size());
     }
 

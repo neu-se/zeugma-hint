@@ -18,7 +18,7 @@ public class HintDeriver implements TestObserver {
     private final TestRunner runner;
     private ComparisonRecorder recorder;
     private GenerateCollector collector;
-    private SimpleSet<StringHint> hints = new SimpleSet<>();
+    private final SimpleSet<StringHint> hints = new SimpleSet<>();
 
     public HintDeriver(FuzzTarget target) {
         DataProviderFactory factory = BasicRecordingDataProvider.createFactory(null, target.getMaxInputSize());
@@ -48,7 +48,7 @@ public class HintDeriver implements TestObserver {
             for (int i = 0; i < matches.size(); i++) {
                 String match = matches.get(i);
                 if (!oldValue.equals(match)) {
-                    String value = replaceFirst(match, oldValue, newValue);
+                    String value = HintUtil.replaceFirst(match, oldValue, newValue);
                     createHints(collector.getSources(match), value);
                 }
             }
@@ -70,23 +70,18 @@ public class HintDeriver implements TestObserver {
         createHints(o2, o1);
     }
 
-    public synchronized SimpleSet<StringHint> derive(ByteList values) {
-        try {
-            runner.run(values);
-            if (recorder != null && collector != null) {
-                recorder.accept(this);
-            }
-            return hints;
-        } finally {
-            recorder = null;
-            collector = null;
-            hints = new SimpleSet<>();
+    public synchronized void derive(ByteList values) {
+        runner.run(values);
+        if (recorder != null && collector != null) {
+            recorder.accept(this);
         }
     }
 
-    private static String replaceFirst(String s, String old, String replacement) {
-        StringBuilder builder = new StringBuilder(s);
-        int index = builder.indexOf(old);
-        return builder.replace(index, index + old.length(), replacement).toString();
+    public synchronized SimpleList<HintSite> getHintSites() {
+        return collector == null ? new SimpleList<>() : HintUtil.toList(collector.getHintSites());
+    }
+
+    public synchronized SimpleList<StringHint> getHints() {
+        return HintUtil.toList(hints);
     }
 }

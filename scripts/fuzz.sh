@@ -1,7 +1,8 @@
 #!/bin/bash
 readonly RESULTS_DIRECTORY=$1
 readonly SUBJECT=$2
-readonly DURATION=$3
+readonly FUZZER=$3
+readonly DURATION=$4
 readonly PROJECT_ROOT=$(pwd)
 readonly SETTINGS_FILE="$(pwd)/resources/settings.xml"
 
@@ -11,7 +12,7 @@ set -x
 set -e
 
 # Print the arguments
-echo "Running: results_directory=$RESULTS_DIRECTORY, subject=$SUBJECT, duration=$DURATION"
+echo "Running: results_directory=$RESULTS_DIRECTORY, subject=$SUBJECT, fuzzer=$FUZZER, duration=$DURATION"
 
 # Export Java home
 export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
@@ -31,7 +32,7 @@ mvn -ntp -B -e \
   -f "$PROJECT_ROOT" \
   -s "$SETTINGS_FILE" \
   -pl :zeugma-hint-evaluation \
-  -P"$SUBJECT" \
+  -P"$SUBJECT,$FUZZER" \
   meringue:fuzz \
   meringue:analyze \
   -Dmeringue.duration="$DURATION" \
@@ -40,6 +41,7 @@ mvn -ntp -B -e \
 # Record configuration information
 echo "{
   \"subject\": \"$SUBJECT\",
+  \"fuzzer\": \"$FUZZER\",
   \"commit_sha\": \"$(git --git-dir "$PROJECT_ROOT/.git" rev-parse HEAD)\",
   \"branch_name\": \"$(git --git-dir "$PROJECT_ROOT/.git" rev-parse --abbrev-ref HEAD)\",
   \"remote_origin_url\": \"$(git --git-dir "$PROJECT_ROOT/.git" config --get remote.origin.url)\"
