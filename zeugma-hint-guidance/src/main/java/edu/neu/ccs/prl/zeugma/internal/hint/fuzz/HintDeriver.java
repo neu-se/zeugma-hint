@@ -17,7 +17,7 @@ import edu.neu.ccs.prl.zeugma.internal.util.Math;
 public class HintDeriver implements TestObserver {
     private static final int MINIMUM_MATCH_LENGTH = 2;
     private final TestRunner runner;
-    private final SimpleSet<StringHint> hints = new SimpleSet<>();
+    private final SimpleSet<Hint> hints = new SimpleSet<>();
     private ComparisonRecorder recorder;
     private GenerateCollector collector;
 
@@ -48,26 +48,26 @@ public class HintDeriver implements TestObserver {
         }
     }
 
-    public synchronized SimpleList<HintSite> getHintSites() {
-        return collector == null ? new SimpleList<>() : HintUtil.toList(collector.getHintSites());
+    public synchronized SimpleSet<Interval> getHintSites() {
+        return collector == null ? new SimpleSet<>(): collector.getHintSites();
     }
 
-    public synchronized SimpleList<StringHint> getHints() {
+    public synchronized SimpleList<Hint> getHints() {
         return HintUtil.toList(hints);
     }
 
     void visit(StringComparison comparison) {
         String o1 = comparison.getOperand1();
         String o2 = comparison.getOperand2();
-        SimpleList<StringHint> h1 = createHints(collector, o1, o2);
-        SimpleList<StringHint> h2 = createHints(collector, o2, o1);
+        SimpleList<Hint> h1 = createHints(collector, o1, o2);
+        SimpleList<Hint> h2 = createHints(collector, o2, o1);
         addHints(h1, h2.isEmpty());
         addHints(h2, h1.isEmpty());
     }
 
-    private synchronized void addHints(SimpleList<StringHint> list, boolean globalizable) {
+    private synchronized void addHints(SimpleList<Hint> list, boolean globalizable) {
         for (int i = 0; i < list.size(); i++) {
-            StringHint hint = list.get(i);
+            Hint hint = list.get(i);
             hint.setGlobalizable(globalizable);
             hints.add(hint);
         }
@@ -88,16 +88,16 @@ public class HintDeriver implements TestObserver {
         return result;
     }
 
-    private static void createHints(SimpleList<StringHint> hints, SimpleList<Interval> sources, String value) {
+    private static void createHints(SimpleList<Hint> hints, SimpleList<Interval> sources, String value) {
         if (sources != null) {
             for (int i = 0; i < sources.size(); i++) {
-                hints.add(new StringHint(sources.get(i), value));
+                hints.add(new Hint(sources.get(i), value));
             }
         }
     }
 
-    private static SimpleList<StringHint> createHints(GenerateCollector collector, String oldValue, String newValue) {
-        SimpleList<StringHint> hints = new SimpleList<>();
+    private static SimpleList<Hint> createHints(GenerateCollector collector, String oldValue, String newValue) {
+        SimpleList<Hint> hints = new SimpleList<>();
         createHints(hints, collector.getSources(oldValue), newValue);
         if (hints.isEmpty() && oldValue.length() >= MINIMUM_MATCH_LENGTH) {
             // A full match could not be found; attempt to find partial matches

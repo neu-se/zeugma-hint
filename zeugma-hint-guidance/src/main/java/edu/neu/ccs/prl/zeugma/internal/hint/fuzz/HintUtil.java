@@ -1,10 +1,16 @@
 package edu.neu.ccs.prl.zeugma.internal.hint.fuzz;
 
+import edu.neu.ccs.prl.zeugma.internal.guidance.linked.CallTreeVertex;
+import edu.neu.ccs.prl.zeugma.internal.guidance.linked.MethodCallVertex;
 import edu.neu.ccs.prl.zeugma.internal.guidance.modify.Mutator;
+import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.GenerateEventBroker;
+import edu.neu.ccs.prl.zeugma.internal.provider.PrimitiveWriter;
+import edu.neu.ccs.prl.zeugma.internal.runtime.model.MethodIdentifier;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.Iterator;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.ObjectIntMap;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleList;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleSet;
+import edu.neu.ccs.prl.zeugma.internal.util.ByteArrayList;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 
 public final class HintUtil {
@@ -67,5 +73,23 @@ public final class HintUtil {
             }
         }
         return child;
+    }
+
+    public static ByteList createReplacements(String target) {
+        ByteList replacements = new ByteArrayList();
+        // Flag to indicate that an unconstrained String should be generated
+        PrimitiveWriter.write(replacements, GenerateEventBroker.FLAG);
+        byte[] values = target.getBytes();
+        PrimitiveWriter.write(replacements, values.length);
+        replacements.addAll(values);
+        return replacements;
+    }
+
+    public static SimpleList<MethodIdentifier> getPathToRoot(MethodCallVertex vertex) {
+        SimpleList<MethodIdentifier> result = new SimpleList<>();
+        for (CallTreeVertex v = vertex; v instanceof MethodCallVertex; v = v.getParent()) {
+            result.add(((MethodCallVertex) v).getMethod());
+        }
+        return result;
     }
 }

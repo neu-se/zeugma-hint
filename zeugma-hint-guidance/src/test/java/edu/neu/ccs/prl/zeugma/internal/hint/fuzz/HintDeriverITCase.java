@@ -46,7 +46,7 @@ class HintDeriverITCase {
         ByteList values = ByteArrayList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);
         HintDeriver deriver = new HintDeriver(new MockFuzzTarget(runner));
         deriver.derive(values);
-        SimpleList<StringHint> hints = deriver.getHints();
+        SimpleList<?> hints = deriver.getHints();
         Assertions.assertEquals(targets.length, hints.size());
     }
 
@@ -61,9 +61,9 @@ class HintDeriverITCase {
         MockFuzzTarget fuzzTarget = new MockFuzzTarget(runner);
         HintDeriver deriver = new HintDeriver(fuzzTarget);
         deriver.derive(values);
-        SimpleList<StringHint> hints = deriver.getHints();
+        SimpleList<? extends DerivedMutator> hints = deriver.getHints();
         Assertions.assertEquals(1, hints.size());
-        StringHint hint = hints.get(0);
+        DerivedMutator hint = hints.get(0);
         ByteList recording = fuzzTarget.report.getRecording();
         AtomicBoolean match = new AtomicBoolean(false);
         fuzzTarget = new MockFuzzTarget(s -> match.set(target.equals(s.get())));
@@ -84,7 +84,7 @@ class HintDeriverITCase {
         ByteList values = ByteArrayList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);
         HintDeriver deriver = new HintDeriver(new MockFuzzTarget(runner));
         deriver.derive(values);
-        SimpleList<StringHint> hints = deriver.getHints();
+        SimpleList<?> hints = deriver.getHints();
         Assertions.assertEquals(0, hints.size());
     }
 

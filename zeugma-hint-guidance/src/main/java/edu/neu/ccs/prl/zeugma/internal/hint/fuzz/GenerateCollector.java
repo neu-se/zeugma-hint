@@ -52,14 +52,14 @@ class GenerateCollector implements GenerateEventSubscriber {
         return matches;
     }
 
-    public synchronized SimpleSet<HintSite> getHintSites() {
+    public synchronized SimpleSet<Interval> getHintSites() {
         Iterator<ObjectIntMap.Entry<Object>> itr = generatedSourceMap.getBackingMap().entryIterator();
-        SimpleSet<HintSite> sites = new SimpleSet<>();
+        SimpleSet<Interval> sites = new SimpleSet<>();
         while (itr.hasNext()) {
             Object key = itr.next().getKey();
             SimpleList<Interval> sources = generatedSourceMap.get(key);
             for (int i = 0; i < sources.size(); i++) {
-                sites.add(new HintSite(sources.get(i)));
+                sites.add(sources.get(i));
             }
         }
         return sites;

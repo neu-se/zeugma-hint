@@ -106,6 +106,14 @@
             </properties>
         </profile>
         <profile>
+            <id>hint-link</id>
+            <properties>
+                <meringue.argLine>
+                    -Dzeugma.hint.level=link
+                </meringue.argLine>
+            </properties>
+        </profile>
+        <profile>
             <id>ant</id>
             <properties>
                 <meringue.testClass>edu.neu.ccs.prl.zeugma.eval.FuzzAnt</meringue.testClass>

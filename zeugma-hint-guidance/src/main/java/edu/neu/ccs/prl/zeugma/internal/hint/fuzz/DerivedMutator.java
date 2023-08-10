@@ -19,6 +19,10 @@ public class DerivedMutator implements Mutator {
         this.replacements = UnmodifiableByteList.of(new ByteArrayList(replacements));
     }
 
+    public ByteList getReplacements() {
+        return replacements;
+    }
+
     public Interval getSource() {
         return source;
     }
