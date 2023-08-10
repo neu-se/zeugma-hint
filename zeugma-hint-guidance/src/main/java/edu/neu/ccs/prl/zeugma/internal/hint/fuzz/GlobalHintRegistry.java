@@ -18,7 +18,7 @@ public final class GlobalHintRegistry {
     public static void register(SimpleList<StringHint> localHints) {
         for (int i = 0; i < localHints.size(); i++) {
             StringHint hint = localHints.get(i);
-            if (targetSet.add(hint.getTarget())) {
+            if (hint.isGlobalizable() && targetSet.add(hint.getTarget())) {
                 targets.add(hint.getTarget());
             }
         }

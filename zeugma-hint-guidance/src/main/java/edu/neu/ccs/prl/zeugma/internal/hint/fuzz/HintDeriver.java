@@ -40,38 +40,6 @@ public class HintDeriver implements TestObserver {
         GenerateEventBroker.setSubscriber(null);
     }
 
-    private synchronized void createHints(String oldValue, String newValue) {
-        if (!createHints(collector.getSources(oldValue), newValue) && oldValue.length() >= MINIMUM_MATCH_LENGTH) {
-            // A full match could not be found; attempt to find partial matches
-            SimpleList<String> matches = collector.findPartialMatches(oldValue);
-            matches = findShortest(matches);
-            for (int i = 0; i < matches.size(); i++) {
-                String match = matches.get(i);
-                if (!oldValue.equals(match)) {
-                    String value = HintUtil.replaceFirst(match, oldValue, newValue);
-                    createHints(collector.getSources(match), value);
-                }
-            }
-        }
-    }
-
-    private synchronized boolean createHints(SimpleList<Interval> sources, String value) {
-        boolean result = false;
-        if (sources != null) {
-            for (int i = 0; i < sources.size(); i++) {
-                hints.add(new StringHint(sources.get(i), value));
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    void visit(StringComparison comparison) {
-        String o1 = comparison.getOperand1();
-        String o2 = comparison.getOperand2();
-        createHints(o1, o2);
-        createHints(o2, o1);
-    }
 
     public synchronized void derive(ByteList values) {
         runner.run(values);
@@ -88,6 +56,23 @@ public class HintDeriver implements TestObserver {
         return HintUtil.toList(hints);
     }
 
+    void visit(StringComparison comparison) {
+        String o1 = comparison.getOperand1();
+        String o2 = comparison.getOperand2();
+        SimpleList<StringHint> h1 = createHints(collector, o1, o2);
+        SimpleList<StringHint> h2 = createHints(collector, o2, o1);
+        addHints(h1, h2.isEmpty());
+        addHints(h2, h1.isEmpty());
+    }
+
+    private synchronized void addHints(SimpleList<StringHint> list, boolean globalizable) {
+        for (int i = 0; i < list.size(); i++) {
+            StringHint hint = list.get(i);
+            hint.setGlobalizable(globalizable);
+            hints.add(hint);
+        }
+    }
+
     private static SimpleList<String> findShortest(SimpleList<String> values) {
         int minLength = Integer.MAX_VALUE;
         for (int i = 0; i < values.size(); i++) {
@@ -101,5 +86,31 @@ public class HintDeriver implements TestObserver {
             }
         }
         return result;
+    }
+
+    private static void createHints(SimpleList<StringHint> hints, SimpleList<Interval> sources, String value) {
+        if (sources != null) {
+            for (int i = 0; i < sources.size(); i++) {
+                hints.add(new StringHint(sources.get(i), value));
+            }
+        }
+    }
+
+    private static SimpleList<StringHint> createHints(GenerateCollector collector, String oldValue, String newValue) {
+        SimpleList<StringHint> hints = new SimpleList<>();
+        createHints(hints, collector.getSources(oldValue), newValue);
+        if (hints.isEmpty() && oldValue.length() >= MINIMUM_MATCH_LENGTH) {
+            // A full match could not be found; attempt to find partial matches
+            SimpleList<String> matches = collector.findPartialMatches(oldValue);
+            matches = findShortest(matches);
+            for (int i = 0; i < matches.size(); i++) {
+                String match = matches.get(i);
+                if (!oldValue.equals(match)) {
+                    String value = HintUtil.replaceFirst(match, oldValue, newValue);
+                    createHints(hints, collector.getSources(match), value);
+                }
+            }
+        }
+        return hints;
     }
 }
