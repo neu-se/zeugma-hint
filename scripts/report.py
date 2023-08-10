@@ -109,7 +109,7 @@ def create_report(input_dir, report_file):
     if coverage is None or detections is None:
         coverage, detections = extract.extract_data(input_dir, input_dir, times)
     coverage, detections = append_base_data(coverage, detections, included_fuzzers)
-    write_report(report_file, compute_template_variables(coverage, detections, times, 'Zeugma-Hint'))
+    write_report(report_file, compute_template_variables(coverage, detections, times, 'Zeugma-X'))
 
 
 def main():
