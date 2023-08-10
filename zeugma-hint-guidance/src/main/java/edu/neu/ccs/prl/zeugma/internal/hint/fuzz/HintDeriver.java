@@ -12,13 +12,14 @@ import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleList;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleSet;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 import edu.neu.ccs.prl.zeugma.internal.util.Interval;
+import edu.neu.ccs.prl.zeugma.internal.util.Math;
 
 public class HintDeriver implements TestObserver {
     private static final int MINIMUM_MATCH_LENGTH = 2;
     private final TestRunner runner;
+    private final SimpleSet<StringHint> hints = new SimpleSet<>();
     private ComparisonRecorder recorder;
     private GenerateCollector collector;
-    private final SimpleSet<StringHint> hints = new SimpleSet<>();
 
     public HintDeriver(FuzzTarget target) {
         DataProviderFactory factory = BasicRecordingDataProvider.createFactory(null, target.getMaxInputSize());
@@ -40,11 +41,10 @@ public class HintDeriver implements TestObserver {
     }
 
     private synchronized void createHints(String oldValue, String newValue) {
-        // The old value matches the entire generated object
-        createHints(collector.getSources(oldValue), newValue);
-        if (oldValue.length() >= MINIMUM_MATCH_LENGTH) {
-            // The generated string contains the old value
+        if (!createHints(collector.getSources(oldValue), newValue) && oldValue.length() >= MINIMUM_MATCH_LENGTH) {
+            // A full match could not be found; attempt to find partial matches
             SimpleList<String> matches = collector.findPartialMatches(oldValue);
+            matches = findShortest(matches);
             for (int i = 0; i < matches.size(); i++) {
                 String match = matches.get(i);
                 if (!oldValue.equals(match)) {
@@ -55,12 +55,15 @@ public class HintDeriver implements TestObserver {
         }
     }
 
-    private synchronized void createHints(SimpleList<Interval> sources, String value) {
+    private synchronized boolean createHints(SimpleList<Interval> sources, String value) {
+        boolean result = false;
         if (sources != null) {
             for (int i = 0; i < sources.size(); i++) {
                 hints.add(new StringHint(sources.get(i), value));
+                result = true;
             }
         }
+        return result;
     }
 
     void visit(StringComparison comparison) {
@@ -83,5 +86,20 @@ public class HintDeriver implements TestObserver {
 
     public synchronized SimpleList<StringHint> getHints() {
         return HintUtil.toList(hints);
+    }
+
+    private static SimpleList<String> findShortest(SimpleList<String> values) {
+        int minLength = Integer.MAX_VALUE;
+        for (int i = 0; i < values.size(); i++) {
+            minLength = Math.min(minLength, values.get(i).length());
+        }
+        SimpleList<String> result = new SimpleList<>();
+        for (int i = 0; i < values.size(); i++) {
+            String value = values.get(i);
+            if (value.length() == minLength) {
+                result.add(value);
+            }
+        }
+        return result;
     }
 }
