@@ -42,7 +42,7 @@
                     <configuration>
                         <framework>edu.neu.ccs.prl.zeugma.hint.framework.ZeugmaHintFramework</framework>
                         <testMethod>testWithGenerator</testMethod>
-                        <jacocoFormats>CSV</jacocoFormats>
+                        <jacocoFormats>HTML,CSV</jacocoFormats>
                         <javaOptions>
                             <option>-Xmx8G</option>
                             <option>-ea</option>
