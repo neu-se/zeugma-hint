@@ -102,7 +102,7 @@ def append_base_data(coverage, detections, included_fuzzers):
 
 
 def create_report(input_dir, report_file):
-    included_fuzzers = ['Zeugma-X', 'Zeugma-Link']
+    included_fuzzers = ['Zeugma-X', 'Zeugma-Link', 'Zest']
     times = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
     coverage = find_dataset(input_dir, 'coverage')
     detections = find_dataset(input_dir, 'detections')
